@@ -1,0 +1,8 @@
+griffon.builder.javafx
+griffon.builder.swing
+griffon.builder.swing.factory
+griffon.javafx.support.icomoonicons
+griffon.plugins.icomoonicons
+griffon.swing.support.icomoonicons
+org.codehaus.griffon.runtime.javafx.icomoonicons
+org.codehaus.griffon.runtime.swing.icomoonicons
