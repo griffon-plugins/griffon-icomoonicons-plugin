@@ -1,0 +1,4 @@
+
+:link_icomoonicons: link:https://icomoon.io/#icons-icomoon[IcoMoon Icon Pack, window="_blank"].
+:api_link_icomoonicon_javafx: link:api/griffon/javafx/support/icomoonicons/IcoMoonIcon.html[griffon.javafx.support.icomoonicons.IcoMoonIcon, window="_blank"]
+:api_link_icomoonicon_swing: link:api/griffon/swing/support/icomoonicons/IcoMoonIcon.html[griffon.swing.support.icomoonicons.IcoMoonIcon, window="_blank"]

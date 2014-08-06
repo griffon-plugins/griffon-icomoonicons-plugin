@@ -1,0 +1,18 @@
+= griffon-icomoonicons-plugin
+:version: 1.0.0.SNAPSHOT
+:linkattrs:
+
+image:http://img.shields.io/travis/griffon-plugins/griffon-icomoonicons-plugin/master.svg["Build Status", link="https://travis-ci.org/griffon-plugins/griffon-icomoonicons-plugin"]
+image:http://img.shields.io/coveralls/griffon-plugins/griffon-icomoonicons-plugin/master.svg["Coverage Status", link="https://coveralls.io/r/griffon-plugins/griffon-icomoonicons-plugin"]
+image:http://img.shields.io/:semver-{version}-blue.svg["Semantic Versioning", link="http://semver.org"]
+image:http://img.shields.io/badge/license-ASF2-blue.svg["Apache License 2", link="http://www.apache.org/licenses/LICENSE-2.0.txt"]
+
+---
+
+Provides a shortcut for adding icons based on
+https://icomoon.io/#icons-icomoon[IcoMoon Icon Pack, window="_blank"].
+
+Refer to the link:http://griffon-plugins.github.io/griffon-icomoonicons-plugin/[plugin guide, window="_blank"] for
+further information on configuration and usage.
+
+
