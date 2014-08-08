@@ -45,6 +45,7 @@ license {
     }
     ext.year = '2014'
     exclude '**/*.png'
+    exclude '**/*.svg'
 }
 
 licenseTest {
