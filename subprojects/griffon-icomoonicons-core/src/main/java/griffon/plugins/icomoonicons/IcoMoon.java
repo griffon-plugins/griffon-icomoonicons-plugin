@@ -19,6 +19,7 @@ import javax.annotation.Nonnull;
 
 import static griffon.util.GriffonClassUtils.requireState;
 import static griffon.util.GriffonNameUtils.isBlank;
+import static griffon.util.GriffonNameUtils.requireNonBlank;
 
 /**
  * @author Andres Almiray
@@ -476,6 +477,8 @@ public enum IcoMoon {
     ZOOM_IN("zoom-in"),
     ZOOM_OUT("zoom-out");
 
+    private static final String ERROR_DESCRIPTION_BLANK = "Argument 'description' must not be blank";
+
     private final String description;
 
     IcoMoon(@Nonnull String description) {
@@ -489,21 +492,112 @@ public enum IcoMoon {
 
     @Nonnull
     public String asResource(int size) {
-        requireState(size == 16 || size == 32, "Argument 'size' must be either 16 or 32.");
+        requireValidSize(size);
         return "io/icomoon/" + size + "px/" + description + ".png";
     }
 
     @Nonnull
-    public static IcoMoon findByDescription(@Nonnull String description) {
-        if (isBlank(description)) {
-            throw new IllegalArgumentException("Description " + description + " is not a valid IcoMoon icon description");
-        }
+    public static String asResource(@Nonnull String description) {
+        int size = 16;
+        checkDescription(description);
 
-        for (IcoMoon icomoon : values()) {
-            if (icomoon.description.equalsIgnoreCase(description)) {
-                return icomoon;
+        String[] parts = description.split(":");
+        if (parts.length == 2) {
+            try {
+                size = Integer.parseInt(parts[1]);
+            } catch (NumberFormatException e) {
+                throw invalidDescription(description, e);
             }
         }
-        throw new IllegalArgumentException("Description " + description + " is not a a valid IcoMoon icon description");
+
+        IcoMoon feed = findByDescription(description, size);
+        return feed.asResource(size);
+    }
+
+    @Nonnull
+    public static IcoMoon findByDescription(@Nonnull String description) {
+        checkDescription(description);
+
+        IcoMoon feed = null;
+        String[] parts = description.split(":");
+        for (IcoMoon f : values()) {
+            if (f.description.equalsIgnoreCase(parts[0])) {
+                feed = f;
+                break;
+            }
+        }
+
+        if (feed == null) {
+            throw invalidDescription(description);
+        }
+
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (parts.length == 2) {
+            int size = 16;
+            try {
+                size = Integer.parseInt(parts[1]);
+            } catch (NumberFormatException e) {
+                throw invalidDescription(description, e);
+            }
+            if (classLoader.getResource(feed.asResource(size)) != null) {
+                return feed;
+            }
+        }
+
+        if (classLoader.getResource(feed.asResource(16)) != null) {
+            return feed;
+        } else if (classLoader.getResource(feed.asResource(32)) != null) {
+            return feed;
+        }
+
+        throw invalidDescription(description);
+    }
+
+    @Nonnull
+    public static IcoMoon findByDescription(@Nonnull String description, int size) {
+        checkDescription(description);
+
+        IcoMoon feed = null;
+        String[] parts = description.split(":");
+        for (IcoMoon f : values()) {
+            if (f.description.equalsIgnoreCase(parts[0])) {
+                feed = f;
+                break;
+            }
+        }
+
+        if (feed == null) {
+            throw invalidDescription(description);
+        }
+
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader.getResource(feed.asResource(size)) != null) {
+            return feed;
+        }
+
+        throw invalidDescription(description);
+    }
+
+    public static int requireValidSize(int size) {
+        requireState(size == 16 || size == 32, "Argument 'size' must be either 16 or 32.");
+        return size;
+    }
+
+    private static void checkDescription(String description) {
+        if (isBlank(description)) {
+            throw invalidDescription(description);
+        }
+    }
+
+    @Nonnull
+    public static IllegalArgumentException invalidDescription(@Nonnull String description) {
+        requireNonBlank(description, ERROR_DESCRIPTION_BLANK);
+        throw new IllegalArgumentException("Description " + description + " is not a valid IcoMoon icon description");
+    }
+
+    @Nonnull
+    public static IllegalArgumentException invalidDescription(@Nonnull String description, Exception e) {
+        requireNonBlank(description, ERROR_DESCRIPTION_BLANK);
+        throw new IllegalArgumentException("Description " + description + " is not a valid IcoMoon icon description", e);
     }
 }

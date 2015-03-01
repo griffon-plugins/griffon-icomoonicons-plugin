@@ -19,16 +19,25 @@ import griffon.plugins.icomoonicons.IcoMoon;
 
 import javax.annotation.Nonnull;
 import javax.swing.ImageIcon;
+import java.awt.Toolkit;
 import java.net.URL;
 
+import static griffon.plugins.icomoonicons.IcoMoon.invalidDescription;
+import static griffon.plugins.icomoonicons.IcoMoon.requireValidSize;
+import static griffon.util.GriffonNameUtils.requireNonBlank;
 import static java.util.Objects.requireNonNull;
 
 /**
  * @author Andres Almiray
  */
 public class IcoMoonIcon extends ImageIcon {
-    private final IcoMoon icomoon;
-    private final int size;
+    private static final String ERROR_ICOMOON_NULL = "Argument 'icomoon' must not be null";
+    private IcoMoon icomoon;
+    private int size;
+
+    public IcoMoonIcon() {
+        this(IcoMoon.findByDescription("icomoon:16"));
+    }
 
     public IcoMoonIcon(@Nonnull IcoMoon icomoon) {
         this(icomoon, 16);
@@ -36,19 +45,24 @@ public class IcoMoonIcon extends ImageIcon {
 
     public IcoMoonIcon(@Nonnull IcoMoon icomoon, int size) {
         super(toURL(icomoon, size));
-        this.icomoon = icomoon;
+        this.icomoon = requireNonNull(icomoon, ERROR_ICOMOON_NULL);
         this.size = size;
     }
 
     public IcoMoonIcon(@Nonnull String description) {
         this(IcoMoon.findByDescription(description));
+        setIcoMoon(description);
     }
 
     @Nonnull
     private static URL toURL(@Nonnull IcoMoon icomoon, int size) {
-        requireNonNull(icomoon, "Argument 'icomoon' must not be null.");
+        requireNonNull(icomoon, ERROR_ICOMOON_NULL);
         String resource = icomoon.asResource(size);
-        return Thread.currentThread().getContextClassLoader().getResource(resource);
+        URL url = Thread.currentThread().getContextClassLoader().getResource(resource);
+        if (url == null) {
+            throw new IllegalArgumentException("Icon " + icomoon + " does not exist");
+        }
+        return url;
     }
 
     @Nonnull
@@ -56,7 +70,36 @@ public class IcoMoonIcon extends ImageIcon {
         return icomoon;
     }
 
+    public void setIcoMoon(@Nonnull IcoMoon icomoon) {
+        this.icomoon = requireNonNull(icomoon, ERROR_ICOMOON_NULL);
+        setImage(Toolkit.getDefaultToolkit().getImage(toURL(icomoon, size)));
+    }
+
+    public void setIcoMoon(@Nonnull String description) {
+        requireNonBlank(description, "Argument 'description' must not be blank");
+
+        String[] parts = description.split(":");
+        if (parts.length == 2) {
+            try {
+                int s = Integer.parseInt(parts[1]);
+                this.size = requireValidSize(s);
+            } catch (NumberFormatException e) {
+                throw invalidDescription(description, e);
+            }
+        } else if (size == 0) {
+            size = 16;
+        }
+
+        this.icomoon = IcoMoon.findByDescription(description);
+        setImage(Toolkit.getDefaultToolkit().getImage(toURL(icomoon, size)));
+    }
+
     public int getSize() {
         return size;
+    }
+
+    public void setSize(int size) {
+        this.size = requireValidSize(size);
+        setImage(Toolkit.getDefaultToolkit().getImage(toURL(icomoon, size)));
     }
 }

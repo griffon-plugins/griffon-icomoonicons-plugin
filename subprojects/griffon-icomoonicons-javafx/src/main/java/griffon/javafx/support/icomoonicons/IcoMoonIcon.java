@@ -19,15 +19,19 @@ import griffon.plugins.icomoonicons.IcoMoon;
 import javafx.scene.image.Image;
 
 import javax.annotation.Nonnull;
+import java.net.URL;
 
+import static griffon.plugins.icomoonicons.IcoMoon.invalidDescription;
+import static griffon.util.GriffonNameUtils.requireNonBlank;
 import static java.util.Objects.requireNonNull;
 
 /**
  * @author Andres Almiray
  */
 public class IcoMoonIcon extends Image {
-    private final IcoMoon icomoon;
-    private final int size;
+    private static final String ERROR_FEED_NULL = "Argument 'icomoon' must not be null.";
+    private IcoMoon icomoon;
+    private int size;
 
     public IcoMoonIcon(@Nonnull IcoMoon icomoon) {
         this(icomoon, 16);
@@ -35,19 +39,46 @@ public class IcoMoonIcon extends Image {
 
     public IcoMoonIcon(@Nonnull IcoMoon icomoon, int size) {
         super(toURL(icomoon, size), true);
-        this.icomoon = icomoon;
+        this.icomoon = requireNonNull(icomoon, ERROR_FEED_NULL);
         this.size = size;
     }
 
     public IcoMoonIcon(@Nonnull String description) {
-        this(IcoMoon.findByDescription(description));
+        super(toURL(description));
+        this.icomoon = IcoMoon.findByDescription(description);
+
+        String[] parts = description.split(":");
+        if (parts.length == 2) {
+            try {
+                this.size = Integer.parseInt(parts[1]);
+            } catch (NumberFormatException e) {
+                throw invalidDescription(description, e);
+            }
+        } else if (size == 0) {
+            size = 16;
+        }
     }
 
     @Nonnull
     private static String toURL(@Nonnull IcoMoon icomoon, int size) {
-        requireNonNull(icomoon, "Argument 'icomoon' must not be null.");
+        requireNonNull(icomoon, ERROR_FEED_NULL);
         String resource = icomoon.asResource(size);
-        return Thread.currentThread().getContextClassLoader().getResource(resource).toExternalForm();
+        URL url = Thread.currentThread().getContextClassLoader().getResource(resource);
+        if (url == null) {
+            throw new IllegalArgumentException("Icon " + icomoon + ":" + size + " does not exist");
+        }
+        return url.toExternalForm();
+    }
+
+    @Nonnull
+    private static String toURL(@Nonnull String description) {
+        requireNonBlank(description, "Argument 'description' must not be blank");
+        String resource = IcoMoon.asResource(description);
+        URL url = Thread.currentThread().getContextClassLoader().getResource(resource);
+        if (url == null) {
+            throw new IllegalArgumentException("Icon " + description + " does not exist");
+        }
+        return url.toExternalForm();
     }
 
     @Nonnull
