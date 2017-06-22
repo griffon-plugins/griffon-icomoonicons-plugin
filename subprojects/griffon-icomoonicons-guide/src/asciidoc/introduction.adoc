@@ -4,3 +4,5 @@
 
 Provides a shortcut for adding icons based on {link_icomoonicons}.
 
+Griffon version: {griffon-version}
+
